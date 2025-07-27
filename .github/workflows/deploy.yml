@@ -3,7 +3,7 @@ name: Deploy to Kubernetes
 on:
   push:
     branches:
-      - master # 当推送到 main 分支时触发
+      - master # 当推送到 master 分支时触发
 
 jobs:
   build:
@@ -27,10 +27,10 @@ jobs:
         run: |
           docker login -u ${{ secrets.CI_REGISTRY_USER }} -p ${{ secrets.CI_REGISTRY_PASSWORD }} ${{ secrets.CI_REGISTRY }}
           cd k8s/docker/server/
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/admin-order-backend:${{ github.sha }} -f Dockerfile .
-          docker tag ${{ secrets.CI_REGISTRY }}/admin-order-backend:${{ github.sha }} ${{ secrets.CI_REGISTRY }}/admin-order-backend:${{ github.sha }}:latest
-          docker push ${{ secrets.CI_REGISTRY }}/admin-order-backend:${{ github.sha }}
-          docker push ${{ secrets.CI_REGISTRY }}/admin-order-backend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }} -f Dockerfile .
+          docker tag ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }} ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }}:latest
+          docker push ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }}
+          docker push ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker
 
       # - name: Set up Kubernetes
       #   uses: azure/setup-kubectl@v1
@@ -44,4 +44,4 @@ jobs:
       #     kubectl config set-context my-context --cluster=my-cluster --user=my-user
       #     kubectl config use-context my-context
       #     kubectl apply -f k8s/deployment.yaml
-      #     kubectl set image deployment/admin-order-backend admin-order-backend=${{ secrets.DOCKER_USERNAME }}/admin-order-backend:${{ github.sha }}
+      #     kubectl set image deployment/evan_lee_repo/images_repo_of_docker evan_lee_repo/images_repo_of_docker=${{ secrets.DOCKER_USERNAME }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }}
