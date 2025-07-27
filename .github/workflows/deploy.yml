@@ -8,11 +8,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: deployment_vars # 使用已配置的环境变量
+    # environment: deployment_vars # 使用已配置的环境变量
     env:
       IMAGE_NAME: ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker # 使用阿里云仓库路径
 
     steps:
+      - name: Check IMAGE_NAME value
+        run: echo ${{ env.IMAGE_NAME }}
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -33,6 +36,9 @@ jobs:
           registry: ${{ secrets.CI_REGISTRY }} # 阿里云 Docker Registry 地址
           username: ${{ secrets.CI_REGISTRY_USER }} # 阿里云 Docker 用户名
           password: ${{ secrets.CI_REGISTRY_PASSWORD }} # 阿里云 Docker 密码
+
+      - name: Check IMAGE_NAME value again
+        run: echo ${{ env.IMAGE_NAME }}
 
       - name: Build & Push Image
         uses: docker/build-push-action@v5
