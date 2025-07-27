@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+spec:
+  replicas: 2 # 控制副本数
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: <your-dockerhub-username>/frontend:latest # 替换为实际镜像地址
+          ports:
+            - containerPort: 80 # 前端容器运行的端口
+          env:
+            - name: NODE_ENV
+              value: "production"
+          resources:
+            limits:
+              cpu: "500m" # 限制 CPU 使用
+              memory: "512Mi" # 限制内存使用
+            requests:
+              cpu: "250m" # 请求的 CPU 资源
+              memory: "256Mi" # 请求的内存资源
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80 # Kubernetes 集群内的访问端口
+      targetPort: 80 # 前端容器实际的端口
+  type: LoadBalancer # 使用负载均衡器，自动分配外部 IP（适用于云环境）
