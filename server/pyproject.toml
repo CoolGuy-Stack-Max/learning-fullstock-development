@@ -3,6 +3,8 @@ name = "admin-order-backend"
 version = "0.1.0"
 description = "Order backend service using FastAPI"
 authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{ include = "app" }]  # 确保 'app' 目录存在，且至少包含 '__init__.py'
 
 [tool.poetry.dependencies]
 python = ">=3.12"
