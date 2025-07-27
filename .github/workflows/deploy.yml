@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Cache Docker layers
         uses: actions/cache@v3 # 升级为 v3
@@ -27,7 +27,7 @@ jobs:
         run: |
           docker login -u ${{ secrets.CI_REGISTRY_USER }} -p ${{ secrets.CI_REGISTRY_PASSWORD }} ${{ secrets.CI_REGISTRY }}
           cd k8s/docker/server/
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }} -f Dockerfile .
+          docker build -t ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }} -f Dockerfile .
           docker tag ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }} ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }}:latest
           docker push ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }}
           docker push ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker
