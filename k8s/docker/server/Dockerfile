@@ -1,6 +1,9 @@
 # ===== 1. Build stage =====
 FROM python:3.11-slim AS builder
 
+WORKDIR /app
+
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     POETRY_HOME=/opt/poetry \
@@ -13,7 +16,6 @@ RUN apt-get update && apt-get install -y curl build-essential && rm -rf /var/lib
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
     ln -s $POETRY_HOME/bin/poetry /usr/local/bin/poetry
 
-WORKDIR /app
 
 # 仅复制依赖文件，利用缓存
 COPY pyproject.toml poetry.lock* ./

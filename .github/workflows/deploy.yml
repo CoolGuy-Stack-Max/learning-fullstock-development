@@ -43,7 +43,7 @@ jobs:
       - name: Build & Push Image
         uses: docker/build-push-action@v5
         with:
-          context: ./k8s/docker/server # 设置构建上下文
+          context: ./server # 设置构建上下文
           file: ./k8s/docker/server/Dockerfile # 设置 Dockerfile 路径
           push: true # 推送镜像到 Docker Registry
           tags: |
