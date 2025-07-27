@@ -47,8 +47,8 @@ jobs:
           file: ./k8s/docker/server/Dockerfile # 设置 Dockerfile 路径
           push: true # 推送镜像到 Docker Registry
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}  # 使用 sha 标签
-            ${{ env.IMAGE_NAME }}:latest  # 使用 latest 标签
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:latest
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache # 启用缓存
           cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max # 启用缓存
 
