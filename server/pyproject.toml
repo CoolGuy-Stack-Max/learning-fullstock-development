@@ -3,8 +3,6 @@ name = "admin-order-backend"
 version = "0.1.0"
 description = "Order backend service using FastAPI"
 authors = ["Your Name <you@example.com>"]
-readme = "README.md"
-packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = ">=3.12"
@@ -32,6 +30,3 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.flake8]
 max-line-length = 120
-
-[tool.poetry]
-package = false
