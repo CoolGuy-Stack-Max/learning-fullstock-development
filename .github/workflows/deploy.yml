@@ -9,40 +9,40 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment: deployment_vars # 使用已配置的环境变量
+    env:
+      IMAGE_NAME: ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker # 使用阿里云仓库路径
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Cache Docker layers
-        uses: actions/cache@v3 # 升级为 v3
+        uses: actions/cache@v3 # buildx 本地 layer cache
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Build Docker image
-        run: |
-          docker login -u ${{ secrets.CI_REGISTRY_USER }} -p ${{ secrets.CI_REGISTRY_PASSWORD }} ${{ secrets.CI_REGISTRY }}
-          cd k8s/docker/server/
-          docker build -t ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }} -f Dockerfile .
-          docker tag ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }} ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }}:latest
-          docker push ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }}
-          docker push ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker
+      - name: Login to Alibaba Cloud Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.CI_REGISTRY }} # 阿里云 Docker Registry 地址
+          username: ${{ secrets.CI_REGISTRY_USER }} # 阿里云 Docker 用户名
+          password: ${{ secrets.CI_REGISTRY_PASSWORD }} # 阿里云 Docker 密码
 
-      # - name: Set up Kubernetes
-      #   uses: azure/setup-kubectl@v1
-      #   with:
-      #     kubectl-version: "latest"
+      - name: Build & Push Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./k8s/docker/server # 设置构建上下文
+          file: ./k8s/docker/server/Dockerfile # 设置 Dockerfile 路径
+          push: true # 推送镜像到 Docker Registry
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}  # 使用 sha 标签
+            ${{ env.IMAGE_NAME }}:latest  # 使用 latest 标签
+          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache # 启用缓存
+          cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max # 启用缓存
 
-      # - name: Deploy to Kubernetes
-      #   run: |
-      #     kubectl config set-cluster my-cluster --server=${{ secrets.K8S_SERVER }} --certificate-authority=${{ secrets.K8S_CA }}
-      #     kubectl config set-credentials my-user --username=${{ secrets.K8S_USER }} --password=${{ secrets.K8S_PASSWORD }}
-      #     kubectl config set-context my-context --cluster=my-cluster --user=my-user
-      #     kubectl config use-context my-context
-      #     kubectl apply -f k8s/deployment.yaml
-      #     kubectl set image deployment/evan_lee_repo/images_repo_of_docker evan_lee_repo/images_repo_of_docker=${{ secrets.DOCKER_USERNAME }}/evan_lee_repo/images_repo_of_docker:${{ github.sha }}
