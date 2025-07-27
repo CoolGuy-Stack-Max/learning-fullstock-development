@@ -3,6 +3,9 @@ FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
+# 复制源代码
+COPY . .
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     POETRY_HOME=/opt/poetry \
@@ -15,12 +18,9 @@ RUN apt-get update && apt-get install -y curl build-essential && rm -rf /var/lib
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
     ln -s $POETRY_HOME/bin/poetry /usr/local/bin/poetry
 
-# 仅复制依赖文件，利用缓存
-COPY pyproject.toml poetry.lock* ./
-RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --only main
 
-# 复制源代码
-COPY . .
+RUN poetry config virtualenvs.create true && poetry install --no-interaction --no-ansi --only main
+
 
 # ===== 2. Runtime stage =====
 FROM python:3.12-slim
