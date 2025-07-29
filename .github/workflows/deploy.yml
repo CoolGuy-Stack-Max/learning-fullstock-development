@@ -119,9 +119,8 @@ jobs:
             echo "-----> Pulling the new image from registry..."
             docker pull $FULL_IMAGE_NAME
 
-            echo "-----> Deploying services with docker-compose..."
-            docker-compose -f ${COMPOSE_FILE_PATH} up --force-recreate --remove-orphans -d
-
+            echo "-----> Deploying services with docker compose..."
+            docker compose -f ${COMPOSE_FILE_PATH} up --force-recreate --remove-orphans -d
             # --- 清理工作 ---
             echo "-----> Pruning old docker images..."
             docker image prune -a --filter="label!=unittest" -f
