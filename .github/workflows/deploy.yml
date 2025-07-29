@@ -1,16 +1,21 @@
-name: Deploy to Kubernetes
+name: Deploy to Aliyun ECS
 
 on:
   push:
     branches:
       - master # 当推送到 master 分支时触发
 
+# 优化：将共享环境变量提升到顶层，所有 jobs 均可访问
+env:
+  REGISTRY: ${{ secrets.CI_REGISTRY }}
+  IMAGE_NAME: ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker
+
 jobs:
   build:
     runs-on: ubuntu-latest
     # environment: deployment_vars # 使用已配置的环境变量
-    env:
-      IMAGE_NAME: ${{ secrets.CI_REGISTRY }}/evan_lee_repo/images_repo_of_docker # 使用阿里云仓库路径
+    outputs:
+      image_tag: ${{ github.sha }}
 
     steps:
       - name: Check IMAGE_NAME value
@@ -51,3 +56,78 @@ jobs:
             ${{ env.IMAGE_NAME }}:latest
           # cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache # 启用缓存
           # cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max # 启用缓存
+      - name: List Docker Images
+        run: docker images
+  # --------------------------------------------------
+  # Job 2: 部署到阿里云服务器
+  # --------------------------------------------------
+  deploy:
+    # 这个 job 总是可以运行，因为它由手动触发
+    runs-on: ubuntu-latest
+    needs: build
+    # 如果你希望部署前必须构建，可以加上 needs: build
+    # 但根据需求，部署和构建是解耦的，所以这里不加 needs
+    # environment: deployment_vars
+    steps:
+      - name: Deploy to Server via SSH
+        # 使用最新的 v5 版本
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ALIYUN_ECS_HOST }} # 服务器公网 IP 或域名
+          username: ${{ secrets.ALIYUN_ECS_USERNAME }} # 登录用户名
+          password: ${{ secrets.ALIYUN_ECS_PASSWORD}} # 用户名密码
+          port: ${{ secrets.ALIYUN_ECS_PORT || 22 }} # SSH 端口，默认为 22
+          # 在远程服务器上执行的脚本
+
+          script: |
+            # --- 步骤 1: 准备环境变量和目录 ---
+            export DEPLOY_DIR="/opt/my-admin-order"
+            export COMPOSE_FILE_PATH="${DEPLOY_DIR}/docker-compose.yml"
+            export SERVER_ENV_PATH="${DEPLOY_DIR}/server-config.env"
+
+            # 修复：从 needs.build.outputs 接收正确的镜像标签
+            export IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
+            export FULL_IMAGE_NAME="${{ env.IMAGE_NAME }}:${IMAGE_TAG}"
+
+            echo "-----> Preparing deployment directory: ${DEPLOY_DIR}"
+            mkdir -p $DEPLOY_DIR
+
+            # --- 步骤 2: 将配置文件部署到服务器 ---
+            # 核心修复：使用 'cat' 和 here-document 将 repo 中的文件内容写入到服务器
+            echo "-----> Deploying docker-compose.yml to server..."
+            cat << 'EOF' > ${COMPOSE_FILE_PATH}
+            ${{ toJSON(fromJSON(cat('k8s/docker/server/docker-compose.yml'))) }}
+            EOF
+
+            echo "-----> Deploying server-config.env to server..."
+            cat << 'EOF' > ${SERVER_ENV_PATH}
+            ${{ toJSON(fromJSON(cat('k8s/docker/server/server-config.env'))) }}
+            EOF
+
+            # --- 步骤 3: 动态更新镜像版本 ---
+            echo "-----> Updating image tag in compose file to: ${FULL_IMAGE_NAME}"
+            # 使用 sed 命令将 compose 文件中的 image 更新为本次构建的唯一版本
+            # 注意：这里的 sed 命令现在可以正常工作了，因为文件已经存在
+            # 这里的 sed 假定你的 compose 文件 image 行格式为 'image: user/repo:tag'
+            sed -i "s|image:.*|image: ${FULL_IMAGE_NAME}|g" ${COMPOSE_FILE_PATH}
+
+            echo "-----> Compose file updated. New content:"
+            cat ${COMPOSE_FILE_PATH}
+
+            # --- 步骤 4: 执行部署 ---
+            cd $DEPLOY_DIR
+
+            echo "-----> Logging in to Docker Registry..."
+            docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}" ${{ env.REGISTRY }}
+
+            echo "-----> Pulling the new image from registry..."
+            docker pull $FULL_IMAGE_NAME
+
+            echo "-----> Deploying services with docker-compose..."
+            docker-compose -f ${COMPOSE_FILE_PATH} up --force-recreate --remove-orphans -d
+
+            # --- 步骤 5: 清理工作 ---
+            echo "-----> Pruning old docker images..."
+            docker image prune -a --filter="label!=unittest" -f
+
+            echo "-----> Deployment Successful!"

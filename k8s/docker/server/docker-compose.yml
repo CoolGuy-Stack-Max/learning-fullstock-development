@@ -1,0 +1,20 @@
+version: "3.8" # 建议使用更新的版本以获得更好的功能支持
+
+services:
+  server:
+    # 引用 .env 文件或环境变量中的值
+    image: "${REGISTRY_BASE_PATH}/${NAME_SPACE}:latest"
+    restart: always
+    env_file:
+      # 指定要加载的 .env 文件名
+      - server-config.env
+    environment:
+      # 将宿主机的 ENV_KEY 变量传递到容器中
+      - ENV_KEY
+    networks:
+      - my-bridge
+    ports:
+      - "8002:80"
+
+networks:
+  my-bridge:
