@@ -78,7 +78,7 @@ jobs:
         with:
           host: ${{ secrets.ALIYUN_ECS_HOST }}
           username: ${{ secrets.ALIYUN_ECS_USERNAME }}
-          key: ${{ secrets.ALIYUN_ECS_SSH_PRIVATE_KEY }}
+          password: ${{ secrets.ALIYUN_ECS_PASSWORD }}
           port: ${{ secrets.ALIYUN_ECS_PORT || 22 }}
           # 要复制的源文件，支持多个
           source: "k8s/docker/server/docker-compose.yml,k8s/docker/server/server-config.env"
@@ -91,7 +91,7 @@ jobs:
         with:
           host: ${{ secrets.ALIYUN_ECS_HOST }}
           username: ${{ secrets.ALIYUN_ECS_USERNAME }}
-          key: ${{ secrets.ALIYUN_ECS_SSH_PRIVATE_KEY }}
+          password: ${{ secrets.ALIYUN_ECS_PASSWORD }}
           port: ${{ secrets.ALIYUN_ECS_PORT || 22 }}
           script: |
             # --- 准备环境变量 ---
