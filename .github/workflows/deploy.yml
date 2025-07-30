@@ -120,6 +120,11 @@ jobs:
             # --- 执行部署 ---
             cd $DEPLOY_DIR
 
+            # --- 检测poetry ---
+            docker run -it --rm ${{ FULL_IMAGE_NAME }} bash
+            which poetry
+            poetry --version
+
             echo "-----> Logging in to Docker Registry..."
             docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}" ${{ env.REGISTRY }}
 
