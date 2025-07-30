@@ -48,8 +48,8 @@ jobs:
 
       - name: Test registry speed
         run: |
-          ping -c 4 registry.cn-shanghai.aliyuncs.com
-          curl -v https://registry.cn-shanghai.aliyuncs.com/v2/
+          ping -c 4 registry.cn-shanghai.aliyuncs.com || true
+          curl -v --max-time 15 https://registry.cn-shanghai.aliyuncs.com/v2/ || true
 
       - name: Build & Push Image
         uses: docker/build-push-action@v5
