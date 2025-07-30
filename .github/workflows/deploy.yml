@@ -126,11 +126,8 @@ jobs:
             echo "-----> Pulling the new image from registry..."
             docker pull $FULL_IMAGE_NAME
 
-            # --- 检测poetry ---
-            # docker run -it <your_image> which poetry
-            docker run -it --rm $FULL_IMAGE_NAME bash
-            poetry --version
-            # exit
+            # 检查 poetry 是否在镜像内
+            docker run --rm $FULL_IMAGE_NAME poetry --version || { echo "poetry not found in image!"; exit 1; }
 
             echo "-----> Deploying services with docker compose..."
             docker compose -f ${COMPOSE_FILE_PATH} up --force-recreate --remove-orphans -d
