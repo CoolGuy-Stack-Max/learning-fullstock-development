@@ -121,7 +121,7 @@ jobs:
             cd $DEPLOY_DIR
 
             # --- 检测poetry ---
-            docker run -it --rm ${{ FULL_IMAGE_NAME }} bash
+            docker run -it --rm ${ FULL_IMAGE_NAME } bash
             which poetry
             poetry --version
 
