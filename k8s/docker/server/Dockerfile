@@ -19,7 +19,7 @@ RUN curl -sSL https://install.python-poetry.org | python3 - && \
     ln -s $POETRY_HOME/bin/poetry /usr/local/bin/poetry
 
 
-RUN poetry config virtualenvs.create true && poetry install --no-interaction --no-ansi --only main
+RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --only main
 
 
 # ===== 2. Runtime stage =====
