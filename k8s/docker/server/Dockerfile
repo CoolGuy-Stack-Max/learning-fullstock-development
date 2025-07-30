@@ -34,12 +34,16 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 # 再次安装 poetry
 ENV POETRY_HOME=/opt/poetry POETRY_VERSION=2.1.3
 
+# Copy the installed packages from the builder stage
+
+
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s $POETRY_HOME/bin/poetry /usr/local/bin/poetry
+ln -s $POETRY_HOME/bin/poetry /usr/local/bin/poetry
 
 ENV PATH="/opt/poetry/bin:$PATH"
 
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /app /app
 
 EXPOSE 8000
-CMD ["poetry", "run", "uvicorn", "app.wsgi:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.wsgi:app", "--host", "0.0.0.0", "--port", "8000"]
