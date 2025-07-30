@@ -129,7 +129,6 @@ jobs:
             # --- 检测poetry ---
             # docker run -it <your_image> which poetry
             docker run -it --rm $FULL_IMAGE_NAME bash
-            which poetry
             poetry --version
             # exit
 

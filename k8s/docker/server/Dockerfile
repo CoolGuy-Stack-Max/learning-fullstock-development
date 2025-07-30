@@ -37,6 +37,8 @@ ENV POETRY_HOME=/opt/poetry POETRY_VERSION=2.1.3
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
     ln -s $POETRY_HOME/bin/poetry /usr/local/bin/poetry
 
+ENV PATH="/opt/poetry/bin:$PATH"
+
 COPY --from=builder /app /app
 
 EXPOSE 8000
