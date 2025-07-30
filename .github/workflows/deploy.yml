@@ -18,6 +18,8 @@ jobs:
       image_tag: ${{ github.sha }}
 
     steps:
+      - timeout-minutes: 5
+
       - name: Check IMAGE_NAME value
         run: echo ${{ env.IMAGE_NAME }}
 
@@ -45,8 +47,14 @@ jobs:
       - name: Check IMAGE_NAME value again
         run: echo ${{ env.IMAGE_NAME }}
 
+      - name: Test registry speed
+        run: |
+          ping -c 4 registry.cn-shanghai.aliyuncs.com
+          curl -v https://registry.cn-shanghai.aliyuncs.com/v2/
+
       - name: Build & Push Image
         uses: docker/build-push-action@v5
+        timeout-minutes: 3
         with:
           context: ./server # 设置构建上下文
           file: ./k8s/docker/server/Dockerfile # 设置 Dockerfile 路径
