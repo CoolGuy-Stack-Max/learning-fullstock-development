@@ -84,6 +84,8 @@ jobs:
           source: "k8s/docker/server/docker-compose.yml,k8s/docker/server/server-config.env"
           # 部署到服务器的目标目录
           target: "/opt/my-admin-order"
+          strip_components: 3
+      # - name: chec
 
       # 步骤 3: 连接到服务器并执行部署命令
       - name: Deploy services via SSH
@@ -99,8 +101,11 @@ jobs:
             export COMPOSE_FILE_PATH="${DEPLOY_DIR}/docker-compose.yml"
             export IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
             export FULL_IMAGE_NAME="${{ env.IMAGE_NAME }}:${IMAGE_TAG}"
-            echo "print list"
-            ls -l /opt/my-admin-order
+            echo "-----> 递归列出所有内容"
+            ls -lR /opt/my-admin-order
+
+            echo "-----> 查找 docker-compose.yml 文件"
+            find /opt/my-admin-order -name 'docker-compose.yml'
 
             echo "-----> Starting deployment for image: ${FULL_IMAGE_NAME}"
 
