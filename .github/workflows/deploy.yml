@@ -17,9 +17,8 @@ jobs:
     outputs:
       image_tag: ${{ github.sha }}
 
+    timeout-minutes: 5
     steps:
-      - timeout-minutes: 5
-
       - name: Check IMAGE_NAME value
         run: echo ${{ env.IMAGE_NAME }}
 
