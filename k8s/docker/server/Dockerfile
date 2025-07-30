@@ -1,49 +1,46 @@
-# ===== 1. Build stage =====
+# ======================================================
+# 1. 构建阶段：安装依赖
+# ======================================================
 FROM python:3.12-slim AS builder
 
+# 禁止 Poetry 创建虚拟环境。
+# 我们将直接把包装在系统的 Python 路径中。
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_CACHE_DIR='/var/cache/pypoetry'
+
 WORKDIR /app
 
-# 复制源代码
+# 安装 poetry 本身
+RUN pip install poetry
+
+# 只复制安装依赖所需的文件，以便利用 Docker 缓存
+COPY poetry.lock pyproject.toml ./
+
+# 将依赖安装到系统的 site-packages 中
+RUN poetry install --no-root --only main
+
+# 复制余下的应用源代码
 COPY . .
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    POETRY_HOME=/opt/poetry \
-    POETRY_VERSION=2.1.3
 
-# 安装基本依赖
-RUN apt-get update && apt-get install -y curl build-essential && rm -rf /var/lib/apt/lists/*
-
-# 安装 Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s $POETRY_HOME/bin/poetry /usr/local/bin/poetry
-
-
-RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --only main
-
-
-# ===== 2. Runtime stage =====
+# ======================================================
+# 2. 运行阶段：创建最终的、干净的镜像
+# ======================================================
 FROM python:3.12-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
-# 再次安装 poetry
-ENV POETRY_HOME=/opt/poetry POETRY_VERSION=2.1.3
-
-# Copy the installed packages from the builder stage
-
-
-RUN curl -sSL https://install.python-poetry.org | python3 - && \
-ln -s $POETRY_HOME/bin/poetry /usr/local/bin/poetry
-
-ENV PATH="/opt/poetry/bin:$PATH"
-
+# 从构建阶段复制已安装的包
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+
+# 从构建阶段复制应用代码
 COPY --from=builder /app /app
 
 EXPOSE 8000
+
+# 直接运行应用。Uvicorn 现在位于系统的 PATH 中。
 CMD ["uvicorn", "app.wsgi:app", "--host", "0.0.0.0", "--port", "8000"]
