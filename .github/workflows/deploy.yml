@@ -120,18 +120,18 @@ jobs:
             # --- 执行部署 ---
             cd $DEPLOY_DIR
 
+            echo "-----> Logging in to Docker Registry..."
+            docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}" ${{ env.REGISTRY }}
+
+            echo "-----> Pulling the new image from registry..."
+            docker pull $FULL_IMAGE_NAME
+
             # --- 检测poetry ---
             # docker run -it <your_image> which poetry
             docker run -it --rm $FULL_IMAGE_NAME bash
             which poetry
             poetry --version
             # exit
-
-            echo "-----> Logging in to Docker Registry..."
-            docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}" ${{ env.REGISTRY }}
-
-            echo "-----> Pulling the new image from registry..."
-            docker pull $FULL_IMAGE_NAME
 
             echo "-----> Deploying services with docker compose..."
             docker compose -f ${COMPOSE_FILE_PATH} up --force-recreate --remove-orphans -d
