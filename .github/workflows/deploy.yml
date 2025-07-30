@@ -99,6 +99,8 @@ jobs:
             export COMPOSE_FILE_PATH="${DEPLOY_DIR}/docker-compose.yml"
             export IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
             export FULL_IMAGE_NAME="${{ env.IMAGE_NAME }}:${IMAGE_TAG}"
+            echo "print list"
+            ls -l /opt/my-admin-order
 
             echo "-----> Starting deployment for image: ${FULL_IMAGE_NAME}"
 
