@@ -122,11 +122,11 @@ jobs:
             sed -i "s|image:.*|image: ${FULL_IMAGE_NAME}|g" ${COMPOSE_FILE_PATH}
 
             echo "-----> Compose file updated. New content:"
-            cat ${COMPOSE_FILE_PATH}
+            # cat ${COMPOSE_FILE_PATH}
 
             # --- 执行部署 ---
             cd $DEPLOY_DIR
-            pwd
+            # pwd
 
             echo "-----> Logging in to Docker Registry..."
             docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}" ${{ env.REGISTRY }}
