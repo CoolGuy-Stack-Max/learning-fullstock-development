@@ -137,6 +137,11 @@ jobs:
             # 检查 poetry 是否在镜像内
             # docker run --rm $FULL_IMAGE_NAME poetry --version || { echo "poetry not found in image!"; exit 1; }
 
+            # --- (推荐) 在这里添加 Alembic 数据库迁移步骤 ---
+            echo "-----> Running database migrations..."
+            # 使用 docker compose run 来在 server 服务的容器内执行一次性命令
+            docker compose -f ${COMPOSE_FILE_PATH} run --rm server python -m alembic upgrade head
+
             echo "-----> Deploying services with docker compose..."
             docker compose -f ${COMPOSE_FILE_PATH} up --force-recreate --remove-orphans -d
             # --- 清理工作 ---

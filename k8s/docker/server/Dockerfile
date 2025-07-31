@@ -6,8 +6,10 @@ FROM python:3.12-slim AS builder
 # 设置工作目录
 WORKDIR /app
 
-RUN apt-get update \
-    apt-get install -y nano
+RUN apt-get update && apt-get install -y \
+    nano \
+    # 如果还需要安装其他工具，可以在这里继续添加，每个工具占一行
+ && rm -rf /var/lib/apt/lists/*
 
 # 安装构建工具 poetry
 RUN pip install poetry
