@@ -13,7 +13,7 @@ RUN pip install poetry
 COPY poetry.lock pyproject.toml ./
 
 # 配置 poetry 不创建虚拟环境，并将依赖安装到系统路径
-RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --only main
+RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --only main --no-root
 
 # 复制剩余的源代码
 COPY . .
