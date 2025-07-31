@@ -43,4 +43,5 @@ COPY --from=builder /app /app
 EXPOSE 8000
 
 # --- 最终修复：使用 python -m 的方式启动 uvicorn ---
-CMD ["python", "-m", "uvicorn", "app.wsgi:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["python", "-m", "uvicorn", "app.wsgi:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sleep", "infinity"]
