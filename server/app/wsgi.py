@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.db.init_db import init_db
+# from app.db.init_db import init_db
 from app.api.v1.router.order import router as orders_router
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
@@ -17,9 +17,9 @@ app.add_middleware(
 )
 
 
-@app.on_event("startup")
-def on_startup() -> None:
-    init_db()
+# @app.on_event("startup")
+# def on_startup() -> None:
+#     init_db()
 
 
 # 注册路由

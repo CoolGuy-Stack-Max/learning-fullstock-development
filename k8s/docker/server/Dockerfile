@@ -6,6 +6,9 @@ FROM python:3.12-slim AS builder
 # 设置工作目录
 WORKDIR /app
 
+RUN apt-get update \
+    apt-get install -y nano
+
 # 安装构建工具 poetry
 RUN pip install poetry
 
@@ -32,6 +35,7 @@ COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/pytho
 
 # 从 builder 阶段复制你的应用程序源代码
 COPY --from=builder /app /app
+
 
 # 暴露端口
 EXPOSE 8000

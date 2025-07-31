@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     # DB_URL: str = "sqlite:///./app.db"  # 生产请切换到 MySQL/PostgreSQL
     # CREATE USER admin_user WITH ENCRYPTED PASSWORD 'admin14145';
     DB_URL: str = "postgresql://admin_user:admin14145@101.133.159.192/admin_order_db"
-
+    backend_cors_origins: list[str] = []  # 类型是字符串列表，默认值可以给一个空列表
     class Config:
         env_file = ".env.development"
         env_file_encoding = "utf-8"
