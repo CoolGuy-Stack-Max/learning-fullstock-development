@@ -6,11 +6,6 @@ FROM python:3.12-slim AS builder
 # 设置工作目录
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    nano \
-    # 如果还需要安装其他工具，可以在这里继续添加，每个工具占一行
- && rm -rf /var/lib/apt/lists/*
-
 # 安装构建工具 poetry
 RUN pip install poetry
 
@@ -32,16 +27,21 @@ FROM python:3.12-slim
 # 设置工作目录
 WORKDIR /app
 
+# 设置 PYTHONPATH 环境变量
+ENV PYTHONPATH=/app
+
+# (之前的修复) 将Python脚本的安装路径添加到系统的PATH中
+ENV PATH="/usr/local/bin:$PATH"
+
 # 从 builder 阶段复制已安装的 Python 依赖包到最终镜像
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
 # 从 builder 阶段复制你的应用程序源代码
 COPY --from=builder /app /app
 
-
 # 暴露端口
 EXPOSE 8000
 
-# --- 最终修复：使用 python -m 的方式启动 uvicorn ---
-# CMD ["python", "-m", "uvicorn", "app.wsgi:app", "--host", "0.0.0.0", "--port", "8000"]
+# --- 最终修复：使用 shell 形式的 CMD 来确保工作目录正确 ---
+# CMD ["sh", "-c", "python -m uvicorn app.wsgi:app --host 0.0.0.0 --port 8000"]
 CMD ["sleep", "infinity"]
