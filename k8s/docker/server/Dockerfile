@@ -43,5 +43,5 @@ COPY --from=builder /app /app
 EXPOSE 8000
 
 # --- 最终修复：使用 shell 形式的 CMD 来确保工作目录正确 ---
-# CMD ["sh", "-c", "python -m uvicorn app.wsgi:app --host 0.0.0.0 --port 8000"]
-CMD ["sleep", "infinity"]
+CMD ["sh", "-c", "python -m uvicorn app.wsgi:app --host 0.0.0.0 --port 8000"]
+# CMD ["sleep", "infinity"]
