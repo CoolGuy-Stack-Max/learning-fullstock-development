@@ -12,7 +12,7 @@ RUN pip install poetry
 # 仅复制依赖定义文件，以利用 Docker 缓存
 COPY poetry.lock pyproject.toml ./
 
-# 配置 poetry 不创建虚拟环境，并将依赖安装到系统路径
+# 配置 poetry 不创建虚拟环境，并将依赖安装到系统路径，且不安装项目本身。
 RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --only main --no-root
 
 # 复制剩余的源代码
@@ -27,7 +27,6 @@ FROM python:3.12-slim
 # 设置工作目录
 WORKDIR /app
 
-# --- 核心修复 ---
 # 从 builder 阶段复制已安装的 Python 依赖包到最终镜像
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
@@ -37,6 +36,5 @@ COPY --from=builder /app /app
 # 暴露端口
 EXPOSE 8000
 
-# 恢复正确的启动命令
-# CMD ["uvicorn", "app.wsgi:app", "--host", "0.0.0.0", "--port", "8000"]
-CMD ["sleep", "infinity"]
+# --- 最终修复：使用 python -m 的方式启动 uvicorn ---
+CMD ["python", "-m", "uvicorn", "app.wsgi:app", "--host", "0.0.0.0", "--port", "8000"]
